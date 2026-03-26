@@ -1,72 +1,81 @@
 import sys
 
 
-def geradorToken(linha):
-    tokens = []
+def initialState(line, i, tokens):
 
+    char = line[i]
+
+    if char == " ":
+        return initialState, i + 1
+
+    if char.isdigit():
+        return numberState, i
+
+    if char in ['+', '-', '*', '/', '%', '^']:
+
+        if char == '/' and line[i + 1] == '/':
+            tokens.append(("OP", "//"))
+            return initialState, i + 1
+
+        tokens.append(("OP", char))
+        return initialState, i + 1
+
+    if char == '(':
+        tokens.append(("LPARENT", char))
+        return initialState, i + 1
+
+    if char == ')':
+        tokens.append(("RPARENT", char))
+        return initialState, i + 1
+
+    if char.isalpha():
+        return wordState, i
+
+
+def numberState(line, i, tokens):
+    num = ""
+
+    while line[i] != " ":
+        num += line[i]
+        i += 1
+
+    tokens.append(("NUMBER", num))
+
+    return initialState, i
+
+
+def wordState(line, i, tokens):
+    word = ""
+
+    while line[i].isalpha():
+        word += line[i]
+        i += 1
+
+    if word == "RES":
+        tokens.append(("RES", word))
+    elif word == "MEM":
+        tokens.append(("MEM", word))
+    else:
+        print("Palavra desconhecida!")
+
+    return initialState, i
+
+
+def tokenGenerator(line):
+    tokens = []
+    state = initialState
     i = 0
 
-    while i < len(linha):
-        char = linha[i]
-
-        if char == " ":
-            i += 1
-            continue
-
-        if char.isdigit():
-            num = ""
-
-            while linha[i] != " ":
-                num += linha[i]
-                i += 1
-
-            tokens.append(("NUMBER", num))
-            continue
-
-        if char in ['+', '-', '*', '/', '%', '^']:
-
-            if char == '/' and linha[i + 1] == '/':
-                tokens.append(("OP", "//"))
-                i += 2
-                continue
-
-            tokens.append(("OP", char))
-            i += 1
-            continue
-
-        if char == '(':
-            tokens.append(("LPARENT", char))
-            i += 1
-            continue
-
-        if char == ')':
-            tokens.append(("RPARENT", char))
-            i += 1
-            continue
-
-        if char.isalpha():
-            word = ""
-
-            while linha[i].isalpha():
-                word += linha[i]
-                i += 1
-
-            if word == "RES":
-                tokens.append(("RES", word))
-            elif word == "MEM":
-                tokens.append(("MEM", word))
-            else:
-                print("Palavra desconhecida!")
-
-            continue
+    while i < len(line):
+        state, i = state(line, i, tokens)
 
     return tokens
 
 
-arquivo = sys.argv[1]
+archive = sys.argv[1]
 
-with open(arquivo, "r") as f:
-    for linha in f:
-        print(linha.strip())
-        token = geradorToken(linha.strip())
+with open(archive, "r") as f:
+    for line in f:
+        print(line.strip())
+        token = tokenGenerator(line.strip())
         print(token)
