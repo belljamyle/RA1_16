@@ -1,3 +1,6 @@
+import sys
+
+
 def geradorToken(linha):
     tokens = []
 
@@ -41,10 +44,10 @@ def geradorToken(linha):
             i += 1
             continue
 
-        if char.isaplha():
+        if char.isalpha():
             word = ""
 
-            while linha[i] != " ":
+            while linha[i].isalpha():
                 word += linha[i]
                 i += 1
 
@@ -59,3 +62,11 @@ def geradorToken(linha):
 
     return tokens
 
+
+arquivo = sys.argv[1]
+
+with open(arquivo, "r") as f:
+    for linha in f:
+        print(linha.strip())
+        token = geradorToken(linha.strip())
+        print(token)
